@@ -153,7 +153,7 @@ public class WallpaperBoardActivity extends AppCompatActivity implements Activit
 
         //interstitial
         interstitial = new InterstitialAd(this);
-        interstitial.setAdUnitId(i);
+        interstitial.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
         requestNewInterstitial();
         ButterKnife.bind(this);
 
