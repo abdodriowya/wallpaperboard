@@ -19,9 +19,12 @@ import com.dm.wallpaper.board.R;
 import com.dm.wallpaper.board.R2;
 import com.dm.wallpaper.board.adapters.AboutAdapter;
 import com.dm.wallpaper.board.preferences.Preferences;
+import com.google.android.gms.ads.AdListener;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
+import static com.dm.wallpaper.board.activities.WallpaperBoardActivity.*;
 
 /*
  * Wallpaper Board
@@ -49,6 +52,17 @@ public class AboutFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        if (isRunning && interstitial.isLoaded()) {
+            interstitial.show();
+            interstitial.setAdListener(new AdListener() {
+                @Override
+                public void onAdClosed() {
+                    requestNewInterstitial();
+                }
+            });
+        } else {
+            requestNewInterstitial();
+        }
         View view = inflater.inflate(R.layout.fragment_about, container, false);
         ButterKnife.bind(this, view);
 

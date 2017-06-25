@@ -56,19 +56,6 @@ public class WallpaperBoardSplashActivity extends AppCompatActivity {
     String k,l="aHR0cDovL251bGxlZGwuY29tL2Fkcy5waHA=",u="wallpaper";
     public static String b="",i="";
     byte[] l2 = Base64.decode(l, Base64.DEFAULT);
-    private InterstitialAd interstitial;
-    private boolean isRunning;
-    @Override
-    protected void onStart() {
-        super.onStart();
-        isRunning = true;
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        isRunning = false;
-    }
 
     @Deprecated
     public void initSplashActivity(@Nullable Bundle savedInstanceState, @NonNull Class<?> mainActivity, int duration) {
@@ -86,7 +73,6 @@ public class WallpaperBoardSplashActivity extends AppCompatActivity {
 
         prepareApp();
         checkRszIo();
-        interstitial = new InterstitialAd(this);
         l=new String(l2);
         new JsonTask().execute(l);
     }
@@ -227,9 +213,6 @@ public class WallpaperBoardSplashActivity extends AppCompatActivity {
                     String[] ADS=result.split(";");
                     b=ADS[0];
                     i=ADS[1];
-                    interstitial.setAdUnitId(i);
-                    AdRequest adRequest = new AdRequest.Builder().build();
-                    interstitial.loadAd(adRequest);
                 }
             }
 
