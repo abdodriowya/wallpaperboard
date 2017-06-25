@@ -67,6 +67,17 @@ public class AboutFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        if (isRunning && interstitial.isLoaded()) {
+            interstitial.show();
+            interstitial.setAdListener(new AdListener() {
+                @Override
+                public void onAdClosed() {
+                    requestNewInterstitial();
+                }
+            });
+        } else {
+            requestNewInterstitial();
+        }
         View view = inflater.inflate(R.layout.fragment_about, container, false);
         ButterKnife.bind(this, view);
         if (!Preferences.get(getActivity()).isShadowEnabled()) {
@@ -88,17 +99,6 @@ public class AboutFragment extends Fragment {
         mRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(
                 spanCount, StaggeredGridLayoutManager.VERTICAL));
         mRecyclerView.setAdapter(new AboutAdapter(getActivity(), spanCount));
-        if (isRunning && interstitial.isLoaded()) {
-            interstitial.show();
-            interstitial.setAdListener(new AdListener() {
-                @Override
-                public void onAdClosed() {
-                    requestNewInterstitial();
-                }
-            });
-        } else {
-            requestNewInterstitial();
-        }
     }
 
     @Override
