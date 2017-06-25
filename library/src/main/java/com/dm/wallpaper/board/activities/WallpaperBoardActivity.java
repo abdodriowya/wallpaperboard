@@ -129,20 +129,6 @@ public class WallpaperBoardActivity extends AppCompatActivity implements Activit
     private String[] mDonationProductsId;
 
     public static boolean sRszIoAvailable;
-    public static InterstitialAd interstitial;
-    public static boolean isRunning;
-    public static int nbrAds = 0;
-    @Override
-    protected void onStart() {
-        super.onStart();
-        isRunning = true;
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        isRunning = false;
-    }
 
     public void initMainActivity(@Nullable Bundle savedInstanceState, boolean isLicenseCheckerEnabled,
                                  @NonNull byte[] salt, @NonNull String licenseKey,
@@ -150,11 +136,6 @@ public class WallpaperBoardActivity extends AppCompatActivity implements Activit
         super.setTheme(Preferences.get(this).isDarkTheme() ?
                 R.style.AppThemeDark : R.style.AppTheme);
         super.onCreate(savedInstanceState);
-
-        //interstitial
-        interstitial = new InterstitialAd(this);
-        interstitial.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
-        requestNewInterstitial();
         ButterKnife.bind(this);
 
         WindowHelper.resetNavigationBarTranslucent(this,
@@ -332,19 +313,6 @@ public class WallpaperBoardActivity extends AppCompatActivity implements Activit
                         WallpapersFragment fragment = (WallpapersFragment)
                                 mFragManager.findFragmentByTag(Extras.TAG_WALLPAPERS);
                         if (fragment != null){
-                            if (isRunning && interstitial.isLoaded()) {
-                                interstitial.show();
-                                interstitial.setAdListener(new AdListener() {
-                                    @Override
-                                    public void onAdClosed() {
-                                        fragment.showPopupBubble();
-                                        requestNewInterstitial();
-                                    }
-                                });
-                            } else {
-                                fragment.showPopupBubble();
-                                requestNewInterstitial();
-                            }
 
                         }
                     }
@@ -625,15 +593,6 @@ public class WallpaperBoardActivity extends AppCompatActivity implements Activit
         if (mFragManager.getBackStackEntryCount() > 0) {
             mFragManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
             onSearchExpanded(false);
-        }
-    }
-    private void requestNewInterstitial() {
-        if(nbrAds==1){
-            nbrAds=0;
-        }else{
-            AdRequest adRequest = new AdRequest.Builder().build();
-            interstitial.loadAd(adRequest);
-            nbrAds=1;
         }
     }
 }
