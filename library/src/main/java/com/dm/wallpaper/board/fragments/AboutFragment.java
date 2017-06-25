@@ -20,6 +20,8 @@ import com.dm.wallpaper.board.R2;
 import com.dm.wallpaper.board.adapters.AboutAdapter;
 import com.dm.wallpaper.board.preferences.Preferences;
 import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.InterstitialAd;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -48,13 +50,36 @@ public class AboutFragment extends Fragment {
 
     @BindView(R2.id.recyclerview)
     RecyclerView mRecyclerView;
+    private InterstitialAd interstitial;
+    private boolean isRunning;
+    public int nbrAds=0;
+    @Override
+    public void onStart() {
+        super.onStart();
+        isRunning = true;
+    }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+        isRunning = false;
+    }
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_about, container, false);
         ButterKnife.bind(this, view);
-
+        if (isRunning && interstitial.isLoaded()) {
+            interstitial.show();
+            interstitial.setAdListener(new AdListener() {
+                @Override
+                public void onAdClosed() {
+                    requestNewInterstitial();
+                }
+            });
+        } else {
+            requestNewInterstitial();
+        }
         if (!Preferences.get(getActivity()).isShadowEnabled()) {
             View shadow = ButterKnife.findById(view, R.id.shadow);
             if (shadow != null) shadow.setVisibility(View.GONE);
@@ -120,5 +145,14 @@ public class AboutFragment extends Fragment {
 
         navBar += ViewHelper.getToolbarHeight(getActivity());
         mRecyclerView.setPadding(padding, padding, 0, navBar);
+    }
+    private void requestNewInterstitial() {
+        if(nbrAds==1){
+            nbrAds=0;
+        }else{
+            AdRequest adRequest = new AdRequest.Builder().build();
+            interstitial.loadAd(adRequest);
+            nbrAds=1;
+        }
     }
 }
