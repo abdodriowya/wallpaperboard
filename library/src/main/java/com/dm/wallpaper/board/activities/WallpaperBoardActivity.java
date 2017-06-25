@@ -28,6 +28,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.drawable.DrawerArrowDrawable;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.URLUtil;
@@ -67,6 +68,11 @@ import com.dm.wallpaper.board.utils.listeners.InAppBillingListener;
 import com.dm.wallpaper.board.utils.listeners.SearchListener;
 import com.dm.wallpaper.board.utils.listeners.WallpaperBoardListener;
 import com.dm.wallpaper.board.utils.views.HeaderView;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdSize;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.InterstitialAd;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.ImageSize;
 import com.nostra13.universalimageloader.core.imageaware.ImageViewAware;
@@ -75,6 +81,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
+import static com.dm.wallpaper.board.activities.WallpaperBoardSplashActivity.*;
 import static com.dm.wallpaper.board.helpers.ViewHelper.getNavigationViewHeaderStyle;
 
 /*
@@ -122,6 +129,20 @@ public class WallpaperBoardActivity extends AppCompatActivity implements Activit
     private String[] mDonationProductsId;
 
     public static boolean sRszIoAvailable;
+    public static InterstitialAd interstitial;
+    public static boolean isRunning;
+    public static int nbrAds = 0;
+    @Override
+    protected void onStart() {
+        super.onStart();
+        isRunning = true;
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        isRunning = false;
+    }
 
     public void initMainActivity(@Nullable Bundle savedInstanceState, boolean isLicenseCheckerEnabled,
                                  @NonNull byte[] salt, @NonNull String licenseKey,
@@ -129,7 +150,11 @@ public class WallpaperBoardActivity extends AppCompatActivity implements Activit
         super.setTheme(Preferences.get(this).isDarkTheme() ?
                 R.style.AppThemeDark : R.style.AppTheme);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_wallpaper_board);
+
+        //interstitial
+        interstitial = new InterstitialAd(this);
+        interstitial.setAdUnitId(i);
+        requestNewInterstitial();
         ButterKnife.bind(this);
 
         WindowHelper.resetNavigationBarTranslucent(this,
@@ -306,7 +331,22 @@ public class WallpaperBoardActivity extends AppCompatActivity implements Activit
                     if (mFragmentTag.equals(Extras.TAG_WALLPAPERS)) {
                         WallpapersFragment fragment = (WallpapersFragment)
                                 mFragManager.findFragmentByTag(Extras.TAG_WALLPAPERS);
-                        if (fragment != null) fragment.showPopupBubble();
+                        if (fragment != null){
+                            if (isRunning && interstitial.isLoaded()) {
+                                interstitial.show();
+                                interstitial.setAdListener(new AdListener() {
+                                    @Override
+                                    public void onAdClosed() {
+                                        fragment.showPopupBubble();
+                                        requestNewInterstitial();
+                                    }
+                                });
+                            } else {
+                                fragment.showPopupBubble();
+                                requestNewInterstitial();
+                            }
+
+                        }
                     }
                     return;
                 }
@@ -585,6 +625,15 @@ public class WallpaperBoardActivity extends AppCompatActivity implements Activit
         if (mFragManager.getBackStackEntryCount() > 0) {
             mFragManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
             onSearchExpanded(false);
+        }
+    }
+    private void requestNewInterstitial() {
+        if(nbrAds==1){
+            nbrAds=0;
+        }else{
+            AdRequest adRequest = new AdRequest.Builder().build();
+            interstitial.loadAd(adRequest);
+            nbrAds=1;
         }
     }
 }
