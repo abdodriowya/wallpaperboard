@@ -69,17 +69,6 @@ public class AboutFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_about, container, false);
         ButterKnife.bind(this, view);
-        if (isRunning && interstitial.isLoaded()) {
-            interstitial.show();
-            interstitial.setAdListener(new AdListener() {
-                @Override
-                public void onAdClosed() {
-                    requestNewInterstitial();
-                }
-            });
-        } else {
-            requestNewInterstitial();
-        }
         if (!Preferences.get(getActivity()).isShadowEnabled()) {
             View shadow = ButterKnife.findById(view, R.id.shadow);
             if (shadow != null) shadow.setVisibility(View.GONE);
